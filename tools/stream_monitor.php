@@ -24,12 +24,12 @@ if (is_numeric($d76067cf9572f7a6691c85c12faf2a29) && $d76067cf9572f7a6691c85c12f
     if (!empty($AutoRestart['days']) && !empty($AutoRestart['at'])) {
         shell_exec('kill -9 ' . $pid);
         sleep(1);
-        if ($Cb60ed5772c86d5ca16425608a588951 && ipTV_streaming::CheckPidStreamExist($pid, $stream_id)) {
+        if ($delayIsEnabled && ipTV_streaming::CheckPidStreamExist($pid, $stream_id)) {
             if (ipTV_streaming::CheckPidChannelM3U8Exist($pid, $stream_id) && file_exists($playlist)) {
                 shell_exec('rm -f ' . STREAMS_PATH . $stream_id . '_*');
                 echo '[*] Correct Usage: php ' . __FILE__ . ' <stream_id> [restart]
 ';
-                if (!$Cb60ed5772c86d5ca16425608a588951) {
+                if (!$delayIsEnabled) {
                     if (ipTV_lib::$SegmentsSettings['seg_time'] * 6 <= time() - $f22b7f23bbbdae3df06477aed82a151c) {
                         sleep(mt_rand(5, 10));
                         $E58daa5817b41e5a33cecae880e2ee63 = md5_file($playlist);
@@ -52,20 +52,20 @@ if (is_numeric($d76067cf9572f7a6691c85c12faf2a29) && $d76067cf9572f7a6691c85c12f
                                                 usleep(50000);
                                                 $rows = $ipTV_db->get_rows();
                                                 sleep(mt_rand(10, 25));
-                                                foreach ($sources as $F3803fa85b38b65447e6d438f8e9176a) {
-                                                    $B16ceb354351bfb3944291018578c764 = ipTV_stream::ParseStreamURL($F3803fa85b38b65447e6d438f8e9176a);
-                                                    if ($B16ceb354351bfb3944291018578c764 == $source) {
+                                                foreach ($sources as $source) {
+                                                    $sourceURL = ipTV_stream::ParseStreamURL($source);
+                                                    if ($sourceURL == $source) {
                                                         break;
                                                     }
-                                                    $F53be324c8d9391cc021f5be5dacdfc1 = strtolower(substr($B16ceb354351bfb3944291018578c764, 0, strpos($B16ceb354351bfb3944291018578c764, '://')));
-                                                    $be9f906faa527985765b1d8c897fb13a = implode(' ', ipTV_stream::EA860c1d3851C46D06e64911E3602768($rows, $F53be324c8d9391cc021f5be5dacdfc1, 'fetch'));
-                                                    if ($stream_info = ipTV_stream::e0a1164567005185E0818f081674e240($B16ceb354351bfb3944291018578c764, SERVER_ID, $be9f906faa527985765b1d8c897fb13a)) {
-                                                        $B71703fbd9f237149967f9ac3c41dc19 = $B16ceb354351bfb3944291018578c764;
+                                                    $protocol = strtolower(substr($sourceURL, 0, strpos($sourceURL, '://')));
+                                                    $ArgumentsList = implode(' ', ipTV_stream::GetArguments($rows, $protocol, 'fetch'));
+                                                    if ($stream_info = ipTV_stream::GetStreamInfo($sourceURL, SERVER_ID, $ArgumentsList)) {
+                                                        $B71703fbd9f237149967f9ac3c41dc19 = $sourceURL;
                                                         break;
                                                     }
                                                 }
                                                 list($fe9d0d199fc51f64065055d8bcade279) = ipTV_streaming::GetSegmentsOfPlaylist($playlist, 10);
-                                                $Cb60ed5772c86d5ca16425608a588951 = true;
+                                                $delayIsEnabled = true;
                                                 die(0);
                                                 $Baee0c34e5755f1cfaa4159ea7e8702e = array_search($source, $sources);
                                                 if (ipTV_streaming::CheckPidChannelM3U8Exist($pid, $stream_id)) {
@@ -77,7 +77,7 @@ if (is_numeric($d76067cf9572f7a6691c85c12faf2a29) && $d76067cf9572f7a6691c85c12f
                                                             echo 'Checking For PlayList...
 ';
                                                             $pid = $streamsSys['delay_pid'];
-                                                            $Cb60ed5772c86d5ca16425608a588951 = $d76067cf9572f7a6691c85c12faf2a29['delay_enabled'];
+                                                            $delayIsEnabled = $d76067cf9572f7a6691c85c12faf2a29['delay_enabled'];
                                                             ++$a88c8d86d7956601164a5f156d5df985;
                                                             if (ipTV_lib::$settings['priority_backup'] == 1 && 1 < count($sources) && $parent_id == 0 && 10 < time() - $bd0f38b3825862e8c62737eefa67a742) {
                                                                 $pid = $d76067cf9572f7a6691c85c12faf2a29['main_pid'];
@@ -119,10 +119,10 @@ if (is_numeric($d76067cf9572f7a6691c85c12faf2a29) && $d76067cf9572f7a6691c85c12f
                                                                     $ipTV_db->close_mysql();
                                                                     usleep(50000);
                                                                     define('FETCH_BOUQUETS', false);
-                                                                    $Cb60ed5772c86d5ca16425608a588951 = false;
+                                                                    $delayIsEnabled = false;
                                                                     do {
                                                                         $source = $d76067cf9572f7a6691c85c12faf2a29['stream_source'];
-                                                                        $E40539dbfb9861abbd877a2ee47b9e65 = ipTV_stream::e0a1164567005185E0818F081674e240($stream_path . $fe9d0d199fc51f64065055d8bcade279, SERVER_ID);
+                                                                        $E40539dbfb9861abbd877a2ee47b9e65 = ipTV_stream::GetStreamInfo($stream_path . $fe9d0d199fc51f64065055d8bcade279, SERVER_ID);
                                                                         $pid = $pid = 0;
                                                                         $a88c8d86d7956601164a5f156d5df985 = 0;
                                                                         do {
@@ -136,12 +136,11 @@ if (is_numeric($d76067cf9572f7a6691c85c12faf2a29) && $d76067cf9572f7a6691c85c12f
                                                                         do {
                                                                         } while (!(ipTV_streaming::CheckPidChannelM3U8Exist($pid, $stream_id) && !file_exists($playlist) && $a88c8d86d7956601164a5f156d5df985 <= ipTV_lib::$SegmentsSettings['seg_time'] * 3));
                                                                         do {
-                                                                        } while (!($Cb60ed5772c86d5ca16425608a588951 && $streamsSys['delay_available_at'] <= time() && !ipTV_streaming::CheckPidStreamExist($pid, $stream_id)));
+                                                                        } while (!($delayIsEnabled && $streamsSys['delay_available_at'] <= time() && !ipTV_streaming::CheckPidStreamExist($pid, $stream_id)));
                                                                     } while (!(0 < $Baee0c34e5755f1cfaa4159ea7e8702e));
                                                                     $playlist = DELAY_STREAM . $stream_id . '_.m3u8';
                                                                     $ipTV_db->CC637bcB0B74b82BeBC2776607e73BEd();
-                                                                    echo 'Restarting...
-';
+                                                                    echo 'Restarting...';
                                                                     list($Ed62709841469f20fe0f7a17a4268692, $minutes) = explode(':', $AutoRestart['at']);
                                                                     $streamsSys = $ipTV_db->get_row();
                                                                     set_time_limit(0);

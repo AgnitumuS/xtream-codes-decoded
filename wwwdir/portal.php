@@ -1035,12 +1035,12 @@ function GetVodOrderedList($category_id = null, $fav = null, $orderby = null, $s
     $output = array('js' => array('total_items' => $counter, 'max_page_items' => $page_items, 'selected_item' => $selected_item, 'cur_page' => $cur_page, 'data' => $datas));
     return json_encode($output, JSON_PARTIAL_OUTPUT_ON_ERROR);
 }
-function EfbbCCe59aAbcEb0b973f0Ba1a94d948($id, $fav = null, $orderby = null, $stream_display_name = null, $movie_properties = array())
+function SeriesEpisodes($id, $fav = null, $orderby = null, $stream_display_name = null, $movie_properties = array())
 {
     global $ipTV_db;
     $ipTV_db->query('SELECT * FROM `series_episodes` t1 INNER JOIN `streams` t2 ON t2.id=t1.stream_id WHERE t1.series_id = \'%d\' ORDER BY t1.season_num DESC, t1.sort ASC', $id);
-    $cc69dbb0749cadc4d6c0543ba360c09d = $ipTV_db->get_rows(true, 'season_num', false);
-    return $cc69dbb0749cadc4d6c0543ba360c09d;
+    $seasons = $ipTV_db->get_rows(true, 'season_num', false);
+    return $seasons;
 }
 function GetSeriesOrderedList($movie_id = null, $category_id = null, $fav = null, $orderby = null, $stream_display_name = null, $movie_properties = array())
 {
@@ -1049,13 +1049,13 @@ function GetSeriesOrderedList($movie_id = null, $category_id = null, $fav = null
     $page_items = 14;
     $default_page = false;
     if (empty($movie_id)) {
-        $Fc0cf310dd1b2294ab167a0658937ab5 = eA44215481573d77C59D844454c19797($dev['user_id'], $category_id, $fav, $orderby, $stream_display_name, $movie_properties);
+        $episodes = SeriesEpisodesByUserId($dev['user_id'], $category_id, $fav, $orderby, $stream_display_name, $movie_properties);
     } else {
-        $Fc0cf310dd1b2294ab167a0658937ab5 = eFBbCCe59AaBcEb0b973F0Ba1A94D948($movie_id, $fav, $orderby, $stream_display_name, $movie_properties);
+        $episodes = SeriesEpisodes($movie_id, $fav, $orderby, $stream_display_name, $movie_properties);
         $ipTV_db->query('SELECT * FROM `series` WHERE `id` = \'%d\'', $movie_id);
         $serie = $ipTV_db->get_row();
     }
-    $counter = count($Fc0cf310dd1b2294ab167a0658937ab5);
+    $counter = count($episodes);
     $ch_idx = 0;
     if ($page == 0) {
         $default_page = true;
@@ -1064,9 +1064,9 @@ function GetSeriesOrderedList($movie_id = null, $category_id = null, $fav = null
             $page = 1;
         }
     }
-    $Fc0cf310dd1b2294ab167a0658937ab5 = array_slice($Fc0cf310dd1b2294ab167a0658937ab5, ($page - 1) * $page_items, $page_items, true);
+    $episodes = array_slice($episodes, ($page - 1) * $page_items, $page_items, true);
     $datas = array();
-    foreach ($Fc0cf310dd1b2294ab167a0658937ab5 as $key => $movie) {
+    foreach ($episodes as $key => $movie) {
         if (!is_null($fav) && $fav == 1 && empty($movie_id)) {
             if (in_array($movie['id'], $dev['fav_channels']['series'])) {
                 if (!empty($serie)) {
@@ -1125,12 +1125,12 @@ function GetSeriesOrderedList($movie_id = null, $category_id = null, $fav = null
     $output = array('js' => array('total_items' => $counter, 'max_page_items' => $page_items, 'selected_item' => $selected_item, 'cur_page' => $cur_page, 'data' => $datas));
     return json_encode($output, JSON_PARTIAL_OUTPUT_ON_ERROR);
 }
-function EA44215481573D77c59D844454c19797($user_id, $category_id = null, $fav = null, $orderby = null, $stream_display_name = null, $movie_properties = array())
+function SeriesEpisodesByUserId($user_id, $category_id = null, $fav = null, $orderby = null, $stream_display_name = null, $movie_properties = array())
 {
     global $dev, $ipTV_db;
     $user_info = ipTV_streaming::GetUserInfo($user_id, null, null, true);
     $series = ipTV_lib::seriesData();
-    $Cc88d22d55f69d2409f5c72665474b50 = array();
+    $ArraySeries = array();
     foreach ($series as $id => $serie) {
         if (!in_array($id, $user_info['series_ids'])) {
             continue;
@@ -1153,26 +1153,26 @@ function EA44215481573D77c59D844454c19797($user_id, $category_id = null, $fav = 
         if (!empty($fav) && !in_array($id, $dev['fav_channels']['series'])) {
             continue;
         }
-        $Cc88d22d55f69d2409f5c72665474b50[$id] = $serie;
+        $ArraySeries[$id] = $serie;
     }
     switch ($orderby) {
         case 'name':
-            uasort($Cc88d22d55f69d2409f5c72665474b50, 'sortArrayStreamName');
+            uasort($ArraySeries, 'sortArrayStreamName');
             break;
         case 'top':
-            uasort($Cc88d22d55f69d2409f5c72665474b50, 'sortArrayStreamRating');
+            uasort($ArraySeries, 'sortArrayStreamRating');
             break;
         case 'rating':
-            uasort($Cc88d22d55f69d2409f5c72665474b50, 'sortArrayStreamRating');
+            uasort($ArraySeries, 'sortArrayStreamRating');
             break;
         case 'added':
-            uasort($Cc88d22d55f69d2409f5c72665474b50, 'sortArrayStreamAdded');
+            uasort($ArraySeries, 'sortArrayStreamAdded');
             break;
         case 'number':
-            uasort($Cc88d22d55f69d2409f5c72665474b50, 'sortArrayStreamNumber');
+            uasort($ArraySeries, 'sortArrayStreamNumber');
             break;
     }
-    return $Cc88d22d55f69d2409f5c72665474b50;
+    return $ArraySeries;
 }
 function GetStreamsFromUser($user_id, $types = array(), $category_id = null, $fav = null, $orderby = null, $stream_display_name = null, $movie_properties = array())
 {

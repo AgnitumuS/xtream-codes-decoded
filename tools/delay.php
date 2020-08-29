@@ -1,13 +1,13 @@
 <?php
 
-function B59f12aD3c67D06C7d816CCE0857A9c0($segment_list)
+function B59f12aD3c67D06C7d816CCE0857A9c0($segmentList)
 {
     global $E24f60f7b980e94775d1c9804fa34f3c;
-    if (!empty($segment_list)) {
+    if (!empty($segmentList)) {
         $d76067cf9572f7a6691c85c12faf2a29 = '';
-        foreach ($segment_list as $fe9d0d199fc51f64065055d8bcade279) {
-            $d76067cf9572f7a6691c85c12faf2a29 .= '#EXTINF:' . $fe9d0d199fc51f64065055d8bcade279['seconds'] . ',
-' . $fe9d0d199fc51f64065055d8bcade279['file'] . '
+        foreach ($segmentList as $segment) {
+            $d76067cf9572f7a6691c85c12faf2a29 .= '#EXTINF:' . $segment['seconds'] . ',
+' . $segment['file'] . '
 ';
         }
         file_put_contents($E24f60f7b980e94775d1c9804fa34f3c, $d76067cf9572f7a6691c85c12faf2a29, LOCK_EX);
